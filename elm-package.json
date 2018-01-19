@@ -1,11 +1,12 @@
 {
     "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/user/project.git",
+    "summary": "Ferguson's Astronomical Rotula",
+    "repository": "https://github.com/bazzargh/volvellm.git",
     "license": "BSD3",
     "source-directories": [
         "src"
     ],
+    "homepage": "https://bazzargh.github.io/volvellm",
     "exposed-modules": [],
     "dependencies": {
         "elm-lang/core": "5.0.0 <= v < 6.0.0",
