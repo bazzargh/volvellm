@@ -50,13 +50,14 @@ type Msg
     | MouseUp Mouse.Event
 
 
-recenter: Model -> (Float, Float) -> (Float, Float)
+recenter : Model -> ( Float, Float ) -> ( Float, Float )
 recenter model ( x, y ) =
     let
         ( ox, oy ) =
             model.origin
     in
-    ( x - ox, y - oy )
+        ( x - ox, y - oy )
+
 
 update : Msg -> Model -> Model
 update msg model =
@@ -71,7 +72,7 @@ update msg model =
             { model | clicked_disc = -1 }
 
 
-click : Model -> Int  -> (Float, Float) -> Model
+click : Model -> Int -> ( Float, Float ) -> Model
 click model ring ( x, y ) =
     let
         ( r, clicked_angle ) =
@@ -86,20 +87,20 @@ click model ring ( x, y ) =
         }
 
 
-dragScale : Model -> (Float, Float) -> Model
+dragScale : Model -> ( Float, Float ) -> Model
 dragScale model ( x, y ) =
     let
         ( r, theta ) =
             toPolar ( x, y )
     in
-    -- this doesn't work right, I kindof understand why.
-    -- when we adjust the scale, it ends up somehow larger
-    -- than it should be, with the result that the rescaled
-    -- point we are now dragging is in the wrong place.
-    { model | scale = clamp 1 3 (r / model.clicked_r) }
+        -- this doesn't work right, I kindof understand why.
+        -- when we adjust the scale, it ends up somehow larger
+        -- than it should be, with the result that the rescaled
+        -- point we are now dragging is in the wrong place.
+        { model | scale = clamp 1 3 (r / model.clicked_r) }
 
 
-dragRotate : Model -> (Float, Float) -> Model
+dragRotate : Model -> ( Float, Float ) -> Model
 dragRotate model ( x, y ) =
     let
         ( r, theta ) =
@@ -108,10 +109,10 @@ dragRotate model ( x, y ) =
         old_angle =
             Maybe.withDefault 0 <| Array.get model.clicked_disc model.old_angles
     in
-    { model | angles = Array.set model.clicked_disc (theta - model.clicked_angle + old_angle) model.angles }
+        { model | angles = Array.set model.clicked_disc (theta - model.clicked_angle + old_angle) model.angles }
 
 
-drag : Model -> (Float, Float) -> Model
+drag : Model -> ( Float, Float ) -> Model
 drag model ( x, y ) =
     case model.clicked_disc of
         (-1) ->
@@ -149,101 +150,101 @@ root model =
         disc n =
             Svg.g [ Attr.transform <| "rotate(" ++ (toString <| (*) (180 / pi) <| Maybe.withDefault 0 <| Array.get n model.angles) ++ ")" ]
     in
-    Html.div []
-    [ Html.h1 [][text "Ferguson's Astronomical Rotula"]
-    , Html.p [] 
-      [text "Ferguson was a self-taught astronomer in the 1700s; he designed this device to replace the use of some astronomical tables, for example, to predict eclipses. You can find the manual he published for it "
-      , Html.a [ HAttr.href "https://books.google.co.uk/books?id=tSlbAAAAcAAJ&printsec=frontcover#v=onepage&q&f=false" ]
-       [ text "here" ]
-      , text ". I was curious how it worked and so sliced up a photo of one in svg so you can play with it. Drag the sun to move, drag the sun's rays to resize, and the other moving parts can be rotated. If the sun lies near the line of the ecliptic (the plane of the earth-moon-sun orbital system) at a new or full moon, the holes in the paper will show through a black mark indicating an eclipse. Eclipses of the moon can usefully be predicted this way, but eclipses of the sun only happen in specific places, so additional calculations would be needed" 
-      ]
+        Html.div []
+            [ svg
+                [ Attr.width "100%"
+                , Attr.height "600"
+                , Mouse.onUp MouseUp
+                , Mouse.onMove MouseMove
+                , Attr.style "border: 1px solid black"
+                ]
+              <|
+                [ Svg.defs []
+                    [ Svg.image
+                        [ Attr.id "image"
+                        , Attr.xlinkHref "rotula.jpeg"
+                        , Attr.width "660px"
+                        , Attr.height "756px"
+                        , Attr.x "-307px"
+                        , Attr.y "-330px"
+                        ]
+                        []
+                    , Svg.pattern
+                        [ Attr.id "plate1"
+                        , Attr.x "0"
+                        , Attr.y "0"
+                        , Attr.width "1"
+                        , Attr.height "1"
+                        ]
+                        [ Svg.g
+                            [ Attr.transform "translate(235,235)" ]
+                            [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
+                        ]
+                    , Svg.pattern
+                        [ Attr.id "plate2"
+                        , Attr.x "0"
+                        , Attr.y "0"
+                        , Attr.width "1"
+                        , Attr.height "1"
+                        ]
+                        [ Svg.g
+                            [ Attr.transform "translate(210,210),rotate(20.5)" ]
+                            [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
+                        ]
+                    , Svg.pattern
+                        [ Attr.id "plate3"
+                        , Attr.x "0"
+                        , Attr.y "0"
+                        , Attr.width "1"
+                        , Attr.height "1"
+                        ]
+                        [ Svg.g
+                            [ Attr.transform "translate(142,142),rotate(209.5)" ]
+                            [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
+                        ]
+                    , Svg.pattern
+                        [ Attr.id "plate4"
+                        , Attr.x "0"
+                        , Attr.y "0"
+                        , Attr.width "1"
+                        , Attr.height "1"
+                        ]
+                        [ Svg.g
+                            [ Attr.transform "translate(132,132.5),rotate(90.5)" ]
+                            [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
+                        ]
+                    , Svg.pattern
+                        [ Attr.id "plate5"
+                        , Attr.x "0"
+                        , Attr.y "0"
+                        , Attr.width "1"
+                        , Attr.height "1"
+                        ]
+                        [ Svg.g
+                            [ Attr.transform "translate(122,122),rotate(84.6)" ]
+                            [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
+                        ]
+                    ]
+                , Svg.g
+                    [ Attr.transform <| "translate(" ++ toString ox ++ "," ++ toString oy ++ "),scale(" ++ toString model.scale ++ ")" ]
+                    [ Svg.g [] <| renderPlate1 model
+                    , disc 5 <| renderPlate2 model
+                    , disc 4 <| renderPlate3 model
+                    , disc 3 <| renderPlate4 model
+                    , disc 2 <| renderPlate5 model
+                    , disc 2 <| renderScaleZone model
+                    , disc 2 <| renderDragZone model
+                    ]
+                ]
+            , Html.h1 [] [ text "Ferguson's Astronomical Rotula" ]
+            , Html.p []
+                [ text "Ferguson was a self-taught astronomer in the 1700s; he designed this device to replace the use of some astronomical tables, for example, to predict eclipses. You can find the manual he published for it "
+                , Html.a [ HAttr.href "https://books.google.co.uk/books?id=tSlbAAAAcAAJ&printsec=frontcover#v=onepage&q&f=false" ]
+                    [ text "here" ]
+                , text ". I was curious how it worked and so sliced up a photo of one in svg so you can play with it. Drag the sun to move, drag the sun's rays to resize, and the other moving parts can be rotated. If the sun lies near the line of the ecliptic (the plane of the earth-moon-sun orbital system) at a new or full moon, the holes in the paper will show through a black mark indicating an eclipse. Eclipses of the moon can usefully be predicted this way, but eclipses of the sun only happen in specific places, so additional calculations would be needed"
+                ]
+            ]
 
-    , svg
-        [ Attr.width "100%"
-        , Attr.height "1000"
-        , Mouse.onUp MouseUp
-        , Mouse.onMove MouseMove
-        , Attr.style "border: 1px solid black"
-        ]
-    <|
-        [ Svg.defs []
-            [ Svg.image
-                [ Attr.id "image"
-                , Attr.xlinkHref "rotula.jpeg"
-                , Attr.width "660px"
-                , Attr.height "756px"
-                , Attr.x "-307px"
-                , Attr.y "-330px"
-                ]
-                []
-            , Svg.pattern
-                [ Attr.id "plate1"
-                , Attr.x "0"
-                , Attr.y "0"
-                , Attr.width "1"
-                , Attr.height "1"
-                ]
-                [ Svg.g
-                    [ Attr.transform "translate(235,235)" ]
-                    [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
-                ]
-            , Svg.pattern
-                [ Attr.id "plate2"
-                , Attr.x "0"
-                , Attr.y "0"
-                , Attr.width "1"
-                , Attr.height "1"
-                ]
-                [ Svg.g
-                    [ Attr.transform "translate(210,210),rotate(20.5)" ]
-                    [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
-                ]
-            , Svg.pattern
-                [ Attr.id "plate3"
-                , Attr.x "0"
-                , Attr.y "0"
-                , Attr.width "1"
-                , Attr.height "1"
-                ]
-                [ Svg.g
-                    [ Attr.transform "translate(142,142),rotate(209.5)" ]
-                    [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
-                ]
-            , Svg.pattern
-                [ Attr.id "plate4"
-                , Attr.x "0"
-                , Attr.y "0"
-                , Attr.width "1"
-                , Attr.height "1"
-                ]
-                [ Svg.g
-                    [ Attr.transform "translate(132,132.5),rotate(90.5)" ]
-                    [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
-                ]
-            , Svg.pattern
-                [ Attr.id "plate5"
-                , Attr.x "0"
-                , Attr.y "0"
-                , Attr.width "1"
-                , Attr.height "1"
-                ]
-                [ Svg.g
-                    [ Attr.transform "translate(122,122),rotate(84.6)" ]
-                    [ Svg.use [ Attr.xlinkHref "#image" ] [] ]
-                ]
-            ]
-        , Svg.g
-            [ Attr.transform <| "translate(" ++ toString ox ++ "," ++ toString oy ++ "),scale(" ++ toString model.scale ++ ")" ]
-            [ Svg.g [] <| renderPlate1 model
-            , disc 5 <| renderPlate2 model
-            , disc 4 <| renderPlate3 model
-            , disc 3 <| renderPlate4 model
-            , disc 2 <| renderPlate5 model
-            , disc 2 <| renderScaleZone model
-            , disc 2 <| renderDragZone model
-            ]
-        ]
-  ]
 
 renderPlate1 : a -> List (Svg.Svg Msg)
 renderPlate1 model =
@@ -254,6 +255,7 @@ renderPlate1 model =
         ]
         []
     ]
+
 
 renderPlate2 : a -> List (Svg.Svg Msg)
 renderPlate2 model =
@@ -266,6 +268,7 @@ renderPlate2 model =
         ]
         []
     ]
+
 
 renderPlate3 : a -> List (Svg.Svg Msg)
 renderPlate3 model =
@@ -298,7 +301,7 @@ renderPlate3 model =
         ]
         []
 
-    -- these dark patches, indicating eclipses, 
+    -- these dark patches, indicating eclipses,
     -- are +/- 12 days for lunar eclipses and +/- 18 days for solar.
     -- (or 11° 38' lunar=(11+38/60)/360*365=11.79,
     -- 17° 25' solar =(17+25/60)/360*365=17.65d)
@@ -307,10 +310,10 @@ renderPlate3 model =
         [ Attr.fill "black"
         , Attr.d <|
             String.join ""
-                [ pathM ( 0, 0 ) ( 79, pi-0.304 )
-                , pathA ( 0, 0 ) Small Clockwise ( 79, pi+0.304 )
-                , pathL ( 0, 0 ) ( 93, pi+0.304 )
-                , pathA ( 0, 0 ) Small Anticlockwise ( 93, pi-0.304 )
+                [ pathM ( 0, 0 ) ( 79, pi - 0.304 )
+                , pathA ( 0, 0 ) Small Clockwise ( 79, pi + 0.304 )
+                , pathL ( 0, 0 ) ( 93, pi + 0.304 )
+                , pathA ( 0, 0 ) Small Anticlockwise ( 93, pi - 0.304 )
                 , pathZ
                 ]
         ]
@@ -319,14 +322,15 @@ renderPlate3 model =
         [ Attr.fill "black"
         , Attr.d <|
             String.join ""
-                [ pathM ( 0, 0 ) ( 97, pi-0.203 )
-                , pathA ( 0, 0 ) Small Clockwise ( 97, pi+0.203 )
-                , pathL ( 0, 0 ) ( 111, pi+0.203 )
-                , pathA ( 0, 0 ) Small Anticlockwise ( 111, pi-0.203 )
+                [ pathM ( 0, 0 ) ( 97, pi - 0.203 )
+                , pathA ( 0, 0 ) Small Clockwise ( 97, pi + 0.203 )
+                , pathL ( 0, 0 ) ( 111, pi + 0.203 )
+                , pathA ( 0, 0 ) Small Anticlockwise ( 111, pi - 0.203 )
                 , pathZ
                 ]
         ]
         []
+
     -- ascending node
     , Svg.path
         [ Attr.fill "black"
@@ -353,6 +357,7 @@ renderPlate3 model =
         ]
         []
     ]
+
 
 renderPlate4 : a -> List (Svg.Svg Msg)
 renderPlate4 model =
@@ -398,6 +403,7 @@ renderPlate4 model =
         []
     ]
 
+
 renderPlate5 : a -> List (Svg.Svg Msg)
 renderPlate5 model =
     [ Svg.path
@@ -422,6 +428,7 @@ renderPlate5 model =
         ]
         []
     ]
+
 
 renderScaleZone : a -> List (Svg.Svg Msg)
 renderScaleZone model =
@@ -450,13 +457,14 @@ pathS xs =
     String.join " " <| List.map toString xs
 
 
-pathM : (Float, Float)->(Float, Float)->String
+pathM : ( Float, Float ) -> ( Float, Float ) -> String
 pathM ( cx, cy ) ( r, theta ) =
     let
         ( x, y ) =
             fromPolar ( r, theta )
     in
-    String.cons 'M' <| pathS [ x + cx, y + cy ]
+        String.cons 'M' <| pathS [ x + cx, y + cy ]
+
 
 pathA : ( Float, Float ) -> ArcType -> ArcSweep -> ( Float, Float ) -> String
 pathA ( cx, cy ) large sweep ( r, theta ) =
@@ -476,21 +484,22 @@ pathA ( cx, cy ) large sweep ( r, theta ) =
         ( x, y ) =
             fromPolar ( r, theta )
     in
-    String.cons 'A' <| pathS [ r, r, 0, lf, sf, x + cx, y + cy ]
+        String.cons 'A' <| pathS [ r, r, 0, lf, sf, x + cx, y + cy ]
 
 
-pathL : (Float, Float)->(Float, Float)->String
+pathL : ( Float, Float ) -> ( Float, Float ) -> String
 pathL ( cx, cy ) ( r, theta ) =
     let
         ( x, y ) =
             fromPolar ( r, theta )
     in
-    String.cons 'L' <| pathS [ x + cx, y + cy ]
+        String.cons 'L' <| pathS [ x + cx, y + cy ]
 
 
 pathZ : String
 pathZ =
     "Z"
+
 
 circlePath : Float -> String
 circlePath r =
@@ -506,6 +515,7 @@ circlePath r =
 -- so put the clickable path last if possible
 -- (this will bite later when I add fills)
 -- paths fills need to be transparent not none to get clicked.
+
 
 renderDragZone : a -> List (Svg.Svg Msg)
 renderDragZone model =
